@@ -20,7 +20,7 @@ const articleSchema = new mongoose.Schema(
 
         status: {
             type: String,
-            enum: ['pending', 'approved', 'rejected'],
+            enum: ['pending', 'validated', 'rejected'],
         }
 
     },
@@ -28,4 +28,6 @@ const articleSchema = new mongoose.Schema(
         timestamps: true,
     }
 );
-export default mongoose.model("Article", articleSchema);
+const Article = mongoose.model("Article", articleSchema);
+export default Article;
+

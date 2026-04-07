@@ -8,6 +8,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 connectDB();
 
+app.use('/api/', articlesRouter)
 
 app.listen(port, 'localhost', () => {
     console.log(`the server is running at port ${port}`);
