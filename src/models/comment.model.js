@@ -2,9 +2,14 @@ import mongoose from "mongoose";
 
 const commentSchema = mongoose.Schema(
     {
-        idArticle: {
+        article: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Article',
+            required: true,
+        },
+        author: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
             required: true,
         },
         commentContent: {
