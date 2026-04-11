@@ -3,20 +3,24 @@ import { body } from "express-validator";
 const objectIdRegex = /^[0-9a-fA-F]{24}$/;
 
 const createArticleValidator = [
-  body("title").trim().notEmpty().withMessage("title is required").isLength({
-    min: 3,
-    max: 150,
-  }),
+  body("title")
+    .trim()
+    .notEmpty()
+    .withMessage("Title is required")
+    .isLength({ min: 3, max: 150 })
+    .withMessage("Title must be between 3 and 150 characters"),
   body("description")
     .trim()
     .notEmpty()
-    .withMessage("description is required")
-    .isLength({ min: 10, max: 500 }),
+    .withMessage("Description is required")
+    .isLength({ min: 10, max: 500 })
+    .withMessage("Description must be between 10 and 500 characters"),
   body("content")
     .trim()
     .notEmpty()
-    .withMessage("content is required")
-    .isLength({ min: 20 }),
+    .withMessage("Content is required")
+    .isLength({ min: 20 })
+    .withMessage("Content must be at least 20 characters long"),
   body("categories")
     .optional()
     .custom((value) => {

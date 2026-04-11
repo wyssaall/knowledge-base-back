@@ -56,6 +56,7 @@ const errorHandler = (err, _req, res, _next) => {
   return res.status(statusCode).json({
     success: false,
     message: err.message || "Internal server error",
+    details: err.details || null,
   });
 };
 

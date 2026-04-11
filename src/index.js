@@ -39,7 +39,7 @@ app.get('/api/health', (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(port, 'localhost', () => {
+app.listen(port, () => {
     console.log(`the server is running at port ${port}`);
 
 })
