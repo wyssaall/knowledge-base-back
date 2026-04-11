@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ['technicien', 'admin'],
       default: 'technicien'
+    },
+    domain: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
     }
   },
   {

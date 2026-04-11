@@ -25,7 +25,7 @@ const getSavedArticles = asyncHandler(async (req, res) => {
   const saved = await Saved.find({ userId: req.user._id })
     .populate({
       path: "articleId",
-      populate: [{ path: "author", select: "name email role" }, { path: "category", select: "name" }],
+      populate: [{ path: "author", select: "name email role" }, { path: "categories", select: "name" }],
     })
     .sort({ createdAt: -1 });
 

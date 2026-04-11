@@ -20,7 +20,7 @@ import {
 
 const articlRouter = express.Router();
 
-articlRouter.get("/", getAllArticles);
+articlRouter.get("/", protect, getAllArticles);
 articlRouter.get("/me/all", protect, authorize("technicien", "admin"), getMyArticles);
 articlRouter.get(
   "/me/pending",

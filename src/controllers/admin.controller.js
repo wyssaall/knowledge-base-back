@@ -2,12 +2,12 @@ import User from "../models/user.model.js";
 import { AppError, asyncHandler } from "../middlewares/error.middleware.js";
 
 const getAllUsers = asyncHandler(async (_req, res) => {
-  const users = await User.find().select("-password").sort({ createdAt: -1 });
+  const users = await User.find().populate("domain", "name").select("-password").sort({ createdAt: -1 });
   res.status(200).json({ success: true, data: users });
 });
 
 const changeUserRole = asyncHandler(async (req, res) => {
-  const { role } = req.body;
+  const { role, domain } = req.body;
   if (!["admin", "technicien"].includes(role)) {
     throw new AppError("role must be admin or technicien", 400);
   }
@@ -16,12 +16,15 @@ const changeUserRole = asyncHandler(async (req, res) => {
   if (!user) throw new AppError("User not found", 404);
 
   user.role = role;
+  if (domain) {
+    user.domain = domain;
+  }
   await user.save();
 
   res.status(200).json({
     success: true,
     message: "Role updated successfully",
-    data: { _id: user._id, email: user.email, role: user.role, name: user.name },
+    data: { _id: user._id, email: user.email, role: user.role, name: user.name, domain: user.domain },
   });
 });
 

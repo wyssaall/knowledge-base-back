@@ -20,10 +20,10 @@ const articleSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-    category: {
+    categories: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
-    },
+    }],
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

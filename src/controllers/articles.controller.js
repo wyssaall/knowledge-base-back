@@ -15,12 +15,12 @@ const getAllArticles = asyncHandler(async (req, res) => {
     filter.status = "validated";
   }
   if (search) filter.title = { $regex: search, $options: "i" };
-  if (category) filter.category = category;
+  if (req.query.categories) filter.categories = { $in: req.query.categories.split(",") };
 
   const [articles, total] = await Promise.all([
     Article.find(filter)
       .populate("author", "name email role")
-      .populate("category", "name")
+      .populate("categories", "name")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parsedLimit),
@@ -39,7 +39,7 @@ const getAllArticles = asyncHandler(async (req, res) => {
 const getOneArticle = asyncHandler(async (req, res) => {
   const article = await Article.findById(req.params.id)
     .populate("author", "name email role")
-    .populate("category", "name");
+    .populate("categories", "name");
   if (!article) throw new AppError("article not found", 404);
 
   const isAdmin = req.user?.role === "admin";
@@ -53,9 +53,20 @@ const getOneArticle = asyncHandler(async (req, res) => {
 
 const createArticle = asyncHandler(async (req, res) => {
   const imageUrl = buildImageUrl(req);
+  
+  let parsedCategories = req.body.categories || [];
+  if (typeof parsedCategories === "string") {
+    try {
+      parsedCategories = JSON.parse(parsedCategories);
+    } catch (e) {
+      parsedCategories = [parsedCategories];
+    }
+  }
+
   const article = await Article.create({
     ...req.body,
     ...(imageUrl ? { imageUrl } : {}),
+    categories: parsedCategories,
     author: req.user._id,
     status: req.user.role === "admin" ? req.body.status || "validated" : "pending",
   });
@@ -72,7 +83,20 @@ const editArticle = asyncHandler(async (req, res) => {
   const imageUrl = buildImageUrl(req);
   Object.assign(article, req.body);
   if (imageUrl) article.imageUrl = imageUrl;
-  if (req.user.role === "technicien") article.status = "pending";
+  let parsedCategories = req.body.categories;
+  if (typeof parsedCategories === "string") {
+    try {
+      parsedCategories = JSON.parse(parsedCategories);
+    } catch (e) {
+      parsedCategories = [parsedCategories];
+    }
+  }
+
+  if (parsedCategories) article.categories = parsedCategories;
+
+  if (req.user.role === "technicien") {
+      article.status = "pending";
+  }
 
   await article.save();
   res.status(200).json({ success: true, data: article });
@@ -100,7 +124,10 @@ const validateArticle = asyncHandler(async (req, res) => {
 });
 
 const getMyArticles = asyncHandler(async (req, res) => {
-  const articles = await Article.find({ author: req.user._id }).sort({ createdAt: -1 });
+  const articles = await Article.find({ author: req.user._id })
+    .populate("author", "name email role")
+    .populate("categories", "name")
+    .sort({ createdAt: -1 });
   res.status(200).json({ success: true, data: articles });
 });
 

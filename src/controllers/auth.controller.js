@@ -7,6 +7,7 @@ const sanitizeUser = (user) => ({
   name: user.name,
   email: user.email,
   role: user.role,
+  domain: user.domain,
   createdAt: user.createdAt,
   updatedAt: user.updatedAt,
 });
@@ -51,7 +52,7 @@ const login = async (req, res) => {
     return res.status(400).json({ message: "email and password are required" });
   }
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).populate("domain", "name");
   if (!user) {
     return res.status(401).json({ message: "Invalid credentials" });
   }

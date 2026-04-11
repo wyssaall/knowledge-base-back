@@ -17,7 +17,7 @@ const protect = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select("-password");
+    const user = await User.findById(decoded.id).select("-password").populate("domain", "name");
 
     if (!user) {
       return res.status(401).json({ success: false, message: "Unauthorized: user not found" });

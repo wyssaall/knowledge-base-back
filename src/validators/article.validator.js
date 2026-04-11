@@ -17,20 +17,38 @@ const createArticleValidator = [
     .notEmpty()
     .withMessage("content is required")
     .isLength({ min: 20 }),
-  body("category")
+  body("categories")
     .optional()
-    .matches(objectIdRegex)
-    .withMessage("category must be a valid ObjectId"),
+    .custom((value) => {
+      let arr = value;
+      if (typeof value === "string") {
+        try { arr = JSON.parse(value); } catch(e) { throw new Error("Invalid JSON array"); }
+      }
+      if (!Array.isArray(arr)) throw new Error("categories must be an array");
+      for (const item of arr) {
+        if (!objectIdRegex.test(item)) throw new Error("each category must be a valid ObjectId");
+      }
+      return true;
+    }),
 ];
 
 const updateArticleValidator = [
   body("title").optional().trim().isLength({ min: 3, max: 150 }),
   body("description").optional().trim().isLength({ min: 10, max: 500 }),
   body("content").optional().trim().isLength({ min: 20 }),
-  body("category")
+  body("categories")
     .optional()
-    .matches(objectIdRegex)
-    .withMessage("category must be a valid ObjectId"),
+    .custom((value) => {
+      let arr = value;
+      if (typeof value === "string") {
+        try { arr = JSON.parse(value); } catch(e) { throw new Error("Invalid JSON array"); }
+      }
+      if (!Array.isArray(arr)) throw new Error("categories must be an array");
+      for (const item of arr) {
+        if (!objectIdRegex.test(item)) throw new Error("each category must be a valid ObjectId");
+      }
+      return true;
+    }),
   body("status")
     .optional()
     .isIn(["pending", "validated", "rejected"])

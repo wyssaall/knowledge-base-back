@@ -7,17 +7,18 @@ const sanitizeUser = (user) => ({
   name: user.name,
   email: user.email,
   role: user.role,
+  domain: user.domain,
   createdAt: user.createdAt,
   updatedAt: user.updatedAt,
 });
 
 const getTechniciens = async (req, res) => {
-  const users = await User.find({ role: "technicien" }).select("-password");
+  const users = await User.find({ role: "technicien" }).populate("domain", "name").select("-password");
   return res.status(200).json(users);
 };
 
 const createTechnicien = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, domain } = req.body;
   if (!name || !email || !password) {
     return res
       .status(400)
@@ -34,14 +35,16 @@ const createTechnicien = async (req, res) => {
     name,
     email,
     password: hashedPassword,
+    password: hashedPassword,
     role: role === "admin" ? "admin" : "technicien",
+    domain: domain || undefined,
   });
 
   return res.status(201).json(sanitizeUser(user));
 };
 
 const updateTechnicien = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, domain } = req.body;
   const user = await User.findById(req.params.id);
 
   if (!user) {
@@ -50,7 +53,10 @@ const updateTechnicien = async (req, res) => {
 
   if (name) user.name = name;
   if (email) user.email = email;
-  if (role && ["admin", "technicien"].includes(role)) user.role = role;
+  if (role && ["admin", "technicien"].includes(role)) {
+    user.role = role;
+  }
+  if (domain) user.domain = domain;
   if (password) user.password = await bcrypt.hash(password, 10);
 
   await user.save();

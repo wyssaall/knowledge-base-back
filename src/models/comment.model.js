@@ -10,7 +10,11 @@ const commentSchema = mongoose.Schema(
         author: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
-            required: true,
+            required: false,
+        },
+        pseudoName: {
+            type: String,
+            required: false,
         },
         commentContent: {
             type: String,

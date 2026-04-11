@@ -1,4 +1,5 @@
 import Article from "../models/article.model.js";
+import mongoose from "mongoose";
 import { asyncHandler } from "../middlewares/error.middleware.js";
 
 const buildPublicFilter = (query) => {
@@ -8,8 +9,17 @@ const buildPublicFilter = (query) => {
     filter.title = { $regex: query.search, $options: "i" };
   }
 
-  if (query.category) {
-    filter.category = query.category;
+  if (query.categories) {
+    filter.categories = { $in: query.categories.split(",") };
+  }
+
+  if (query.ids) {
+    const validIds = query.ids.split(",").filter(id => mongoose.Types.ObjectId.isValid(id.trim()));
+    if (validIds.length > 0) {
+      filter._id = { $in: validIds };
+    } else {
+      filter._id = { $in: [new mongoose.Types.ObjectId()] }; // Force empty result if no valid ids
+    }
   }
 
   return filter;
@@ -23,7 +33,7 @@ const getPublicArticles = asyncHandler(async (req, res) => {
 
   const [articles, total] = await Promise.all([
     Article.find(filter)
-      .populate("category", "name")
+      .populate("categories", "name")
       .populate("author", "name")
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -45,7 +55,7 @@ const getPublicArticleById = asyncHandler(async (req, res) => {
     _id: req.params.id,
     status: "validated",
   })
-    .populate("category", "name")
+    .populate("categories", "name")
     .populate("author", "name");
 
   if (!article) {
